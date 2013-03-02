@@ -1,0 +1,106 @@
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+
+		<script type="text/javascript" src="/plupload/js/plupload.js"></script>
+		<script type="text/javascript" src="/plupload/js/plupload.html5.js"></script>
+		<script type="text/javascript" src="/plupload/js/plupload.flash.js"></script>
+
+		<title>Plupload test</title>
+	</head>	
+	<body>		
+		<h1>Custom example</h1>
+
+		<p>Shows you how to use the core plupload API.</p>
+		
+		<div id="container">
+		    <div id="runtime">No runtime found.</div>
+		    File list:
+		    <div id="filelist"></div>
+		    <br />
+		    <input id="selectfiles" type="button" value="Select files" />
+		    <input id="uploadfiles" type="button" value="Upload files" />
+		</div>
+		
+		
+		<script type="text/javascript">
+
+		function $(id) {
+			return document.getElementById(id);	
+		}		
+		
+		var uploader = new plupload.Uploader({
+			runtimes : 'html5,flash',
+			browse_button : 'selectfiles',
+			container: 'container', 
+			max_file_size : '1mb',
+			multipart : 'false',
+			multi_selection: true, 
+			url : '/plupload/UploadServlet',
+			resize : {width : 800, height : 600, quality : 30},
+			flash_swf_url : '/plupload/js/plupload.flash.swf',
+			filters : [
+				{title : "Image files", extensions : "jpg,png"}
+			]
+		});
+		
+		uploader.bind('Init', function(up, params) {
+			$('runtime').innerHTML = "<div>Current runtime: " + params.runtime + "</div>";
+		});
+		
+		uploader.bind('FilesAdded', function(up, addedFiles) {
+			updateFileList(up.files.concat(addedFiles));
+		});
+		
+		uploader.bind('UploadProgress', function(up, file) {
+			//$(file.id).getElementsByTagName('b')[0].innerHTML = '<span>' + file.percent + "%</span>";
+		});
+		
+		uploader.bind('FileUploaded', function(up, file, info) {
+		
+			if (up.total.queued <= 1) {
+				alert("Files uploaded successfully.");
+				location.reload();
+			}
+		});
+		
+		uploader.bind('Error', function(up, info) {
+			
+			switch (info.code){
+				case -601:
+				case -200:
+					alert("Format of file [" + info.file.name + "] not supported.");
+					break;
+				case -600:
+					alert("Size of file [" + info.file.name + " : " + plupload.formatSize(info.file.size) + "] exceeds the allowable limit [" + plupload.formatSize(up.settings.max_file_size) + "].");
+					break;
+				default:
+					alert("An error has ocurred." + info.code + " / " + info.message);		
+			}
+
+			updateFileList(up.files);
+		});
+		
+		$('uploadfiles').onclick = function() {
+
+			if (uploader.total.queued == 0) {
+				alert("The file list is empty.");
+			} else {
+				uploader.start();
+			}
+						
+			return false;
+		};
+		
+		function updateFileList(files) {
+
+			$('filelist').innerHTML = '';			
+			for (var i in files) {
+				$('filelist').innerHTML += '<div id="' + files[i].id + '">' + files[i].name + ' (' + plupload.formatSize(files[i].size) + ') <b id=\'pct-' + files[i].id + '\'></b></div>';
+			}
+		}
+		
+		uploader.init();
+		</script>
+	</body>	
+</html>
