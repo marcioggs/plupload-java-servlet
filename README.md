@@ -2,7 +2,7 @@ plupload-java-servlet
 =====================
 
 Java servlet that processes Plupload request.
-This application was implemented for use in a project that needs the uploaded image to compressed in the client-side to save server bandwidth.
+This application was implemented for use in a project that needs the uploaded image to be compressed in the client-side to save server bandwidth.
 
 Used/implemented features:
 --------------------------
